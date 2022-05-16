@@ -10,19 +10,9 @@ import time
 
 backend = "http://localhost:8000/"
 
-def getData():
-    return requests.post(backend, files=files)
+def getData(img_file):
+    return requests.post(backend, files=img_file)
 
-
-def process(image, server_url: str):
-    
-    m = MultipartEncoder(fields={"file": ("filename", image, "image/jpeg")})
-
-    r = requests.post(
-        server_url, data=m, headers={"Content-Type": m.content_type}, timeout=8000
-    )
-
-    return r
 
 st.title('비슷한 옷을 추천해줘')
 
@@ -48,12 +38,12 @@ if img_file:
 
 if st.button("업로드 완료"):
     if cropped_img :
-        files = {"file": np.array(cropped_img)}
+        img_np_array = {"file": np.array(cropped_img)}
         try:
-            result = getData() 
+            result = getData(img_np_array) 
         except:
             time.sleep(2)
-            result = getData()
+            result = getData(img_np_array)
         img_path = result.json()
         print(img_path)
         image = Image.open(img_path.get("name"))
