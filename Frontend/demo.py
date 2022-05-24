@@ -8,19 +8,16 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder
 import io
 import time
 
-backend = "http://localhost:8000/"
+backend = "http://fastapi:8000/"
 
-def getData(img_file):
-    '''
-    image file을 backend 주소로 보내는 함수
-    
-    Parameters :
-    img_file(dtype=dict) : file name(dtype:str) + cropped image array(dtype:ndarray)
-    
-    return :
-    Response(dtype=requests.Response) : backend에서 post하는 data를 return(dtype=dict {"name": "Backend/img_test"})
-    '''
-    return requests.post(backend, files=img_file)
+def getData(img_file, server_url = backend + 'getSimilarFashion'):
+    m = MultipartEncoder(fields={"category": category, "file": ("filename", image, "image/jpeg")})
+
+    r = requests.post(
+        server_url, data=m, headers={"Content-Type": m.content_type}, timeout=8000
+    )
+
+    return r
 
 # title 설정
 st.title('비슷한 옷을 추천해줘')
@@ -47,29 +44,37 @@ if img_file:
     image = cropped_img.thumbnail((500,500))
     st.image(cropped_img)
 
+# 옷 종류 select 기능
+category = st.selectbox('옷 종류',
+                    ('티셔츠', '바지', '신발', '모자', '추가 예정'))
+
+st.write('You selected:', category)
 
 # 업로드 버튼을 누를 시 crop된 이미지를 확인, backend로 post 후에 image가 있는 dict를 받아옴
 if st.button("업로드 완료"):
     if cropped_img :
-        img_np_array = {"file": np.array(cropped_img)}
+        img_np_array = img_file
         # ConnectionError: HTTPConnectionPool 방지
         try:
-            result = getData(img_np_array) 
+            result = getData( img_np_array) 
+            pass
         except:
             time.sleep(2)
-            result = getData(img_np_array)
-        img_path = result.json()
-        print(img_path)
-        image = Image.open(img_path.get("name"))
-        st.image(image, width=500)
+            result = getData( img_np_array)
+        col1, col2, col3, col4 = st.columns(4)
+        col1.header("image0")
+        col1.image(result.json()["image0"], use_column_width=True)
+        col2.header("image1")
+        col2.image(result.json()["image1"], use_column_width=True)
+        col3.header("image2")
+        col3.image(result.json()["image2"], use_column_width=True)
+        col4.header("image3")
+        col4.image(result.json()["image3"], use_column_width=True)
+
     else:
         st.write("좌측에서 이미지를 넣어주세요.")
 
 # 이후 추가될 기능
 st.write("무언가가 진행될 예정")
 
-# 옷 종류 select 기능
-option = st.selectbox('옷 종류',
-                    ('티셔츠', '바지', '신발', '모자', '추가 예정'))
 
-st.write('You selected:', option)
