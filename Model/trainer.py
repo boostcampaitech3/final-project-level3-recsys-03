@@ -5,11 +5,11 @@ import numpy as np
 import torch
 import wandb
 
-from dataloader import get_loaders
+from dataloader import get_loaders, get_transforms
 from model import NeuralNetwork
 from optimizer import get_optimizer
 from scheduler import get_scheduler
-from feature_extraction import get_pretrained_model
+from feature_extraction import get_pretrained_model, get_extraction
 from utils import get_similarity, draw
 
 
@@ -131,38 +131,37 @@ def validate(valid_loader, model, config):
     return acc
 
 
-def inference(config, test_data, train_data):
-    # test image를 feature extraction하여 target을 예측
+def inference(config, image_path, extracted_data, path_list):
+    """
+    test image를 feature extraction하여 target을 예측
+    
+    Parameters:
+    image_path(dtype=str): test data path
+    extracted_data(dtype=np.array) : feature extraction된 data, label, path
+    path_list(dtype=list) : path가 담겨진 list
+    """
+    transform = get_transforms()
     pre_model = get_pretrained_model(config)
     model = load_model(config)
+    sim_method = get_similarity(config)
 
     model.eval()
 
-    input = pre_model(test_data.unsqueeze(dim=0).to(config.device))
-    logits = model(input)
-    _, preds = torch.max(logits, 1)
+    with torch.no_grad():
+        # input은 이미 cuda가 적용된 변수(dtype=torch.cuda.FloatTensor)
+        input = get_extraction(config, image_path, transform, pre_model)
+        logits = model(input)
+        _, preds = torch.max(logits, 1)
 
-    print("predict :", config.id2product[int(preds)])
+        print("predict :", config.id2product[int(preds)])
 
-    # similarity를 구하기 위해서 train dataset 사용
-    # 같은 label을 갖는 데이터셋을 dataloader에 넣어서 batch 단위로 simialrity 계산
-    dataset = train_data[train_data["label"]==int(preds)]
+        # similarity를 구함
+        data = torch.tensor(extracted_data[:,:-1])
+        total_similarity = sim_method(input, data.to(config.device))
 
-    _, test_loader = get_loaders(config, None, dataset)
-
-    sim_method = get_similarity(config)
-    total_similarity = torch.tensor([]).to(config.device)
-
-    for step, (images, _) in enumerate(test_loader):
-        images = images.to(config.device)
-        features = pre_model(images)
-        
-        similarity_tensor = sim_method(input, features)
-        total_similarity = torch.cat([total_similarity, similarity_tensor], dim=0)
-
-    # total_similarity 중 가장 similiarity가 높은 data k개의 path로 image 생성
-    topk_idx = np.array(torch.topk(total_similarity, config.k)[1].to('cpu'))
-    topk_path = dataset.iloc[topk_idx].path.values
+        # total_similarity 중 가장 similiarity가 높은 data k개의 path로 image 생성
+        topk_idx = np.array(torch.topk(total_similarity, config.k)[1].to('cpu'))
+        topk_path = np.array(path_list)[topk_idx]
 
     draw(config, topk_path)
 
