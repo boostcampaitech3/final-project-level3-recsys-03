@@ -24,7 +24,7 @@ def read_root():
 
 @app.post("/getSimilarFashion")
 def get_similar_fashion(file: bytes = File(...)):
-	similar_fashion_list = get_similar_fashion_model(file)
+	similar_fashion_list = get_similar_fashion_model(image=file)
 
 	return {"image0" : similar_fashion_list[0], "image1" : similar_fashion_list[1], "image2" : similar_fashion_list[2], "image3" : similar_fashion_list[3]}
 

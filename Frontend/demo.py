@@ -10,8 +10,9 @@ import time
 
 backend = "http://fastapi:8000/"
 
-def getData(img_file, server_url = backend + 'getSimilarFashion'):
-    m = MultipartEncoder(fields={"category": category, "file": ("filename", image, "image/jpeg")})
+def getData(category, img_file, server_url = backend + 'getSimilarFashion'):
+    # m = MultipartEncoder(fields={"category": category, "file": ("filename", img_file, "image/jpeg")}) # category 추가시 충돌 버그
+    m = MultipartEncoder(fields={"file": ("filename", img_file, "image/jpeg")})
 
     r = requests.post(
         server_url, data=m, headers={"Content-Type": m.content_type}, timeout=8000
@@ -45,6 +46,7 @@ if img_file:
     st.image(cropped_img)
 
 # 옷 종류 select 기능
+category = '티셔츠'
 category = st.selectbox('옷 종류',
                     ('티셔츠', '바지', '신발', '모자', '추가 예정'))
 
@@ -56,11 +58,11 @@ if st.button("업로드 완료"):
         img_np_array = img_file
         # ConnectionError: HTTPConnectionPool 방지
         try:
-            result = getData( img_np_array) 
+            result = getData(category, img_np_array) 
             pass
         except:
             time.sleep(2)
-            result = getData( img_np_array)
+            result = getData(category, img_np_array)
         col1, col2, col3, col4 = st.columns(4)
         col1.header("image0")
         col1.image(result.json()["image0"], use_column_width=True)
