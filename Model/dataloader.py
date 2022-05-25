@@ -63,6 +63,24 @@ class HandMDataset(torch.utils.data.Dataset):
         return len(self.X)
 
 
+class ExtractionDataset(torch.utils.data.Dataset):
+    """
+    classfication 단게에서 사용
+    """
+    def __init__(self, img):
+        self.data = img[:, :-1]
+        self.label = img[:, -1]
+    
+    def __getitem__(self, index):
+        X = torch.tensor(self.data[index], dtype=torch.float32)
+        y = torch.tensor(self.label[index], dtype=torch.int64)
+
+        return X, y
+
+    def __len__(self):
+        return len(self.data)
+
+
 def get_transforms():
     transform = transforms.Compose([Resize((224, 224), Image.BILINEAR),
                                     # RandomHorizontalFlip(p=0.3), # randomly H_flip images
@@ -89,7 +107,7 @@ def get_loaders(config, train, valid):
     train_loader, valid_loader = None, None
 
     if train is not None:
-        trainset = HandMDataset(train)
+        trainset = ExtractionDataset(train)
         train_loader = torch.utils.data.DataLoader(
             trainset,
             shuffle=True,
@@ -97,7 +115,7 @@ def get_loaders(config, train, valid):
             pin_memory=pin_memory,
         )
     if valid is not None:
-        valset = HandMDataset(valid)
+        valset = ExtractionDataset(valid)
         valid_loader = torch.utils.data.DataLoader(
             valset,
             shuffle=False,
