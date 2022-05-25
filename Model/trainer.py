@@ -15,6 +15,10 @@ from utils import get_similarity, draw
 
 def run(config, train_data, valid_data):
     train_loader, valid_loader = get_loaders(config, train_data, valid_data)
+    
+    # hidden, output dimension을 데이터에 맞게 적용
+    config.hidden_dim = train_data[:, :-1].shape[1]
+    config.output_dim = int(max(train_data[:,-1])) + 1  # 0부터 시작하므로 갯수는 +1 해줌
 
     # only when using warmup scheduler
     config.total_steps = int(math.ceil(len(train_loader.dataset) / config.batch_size)) * (
@@ -22,7 +26,6 @@ def run(config, train_data, valid_data):
     )
     config.warmup_steps = config.total_steps // 10
 
-    pre_model = get_pretrained_model(config)
     model = get_model(config)
     optimizer = get_optimizer(model, config)
     scheduler = get_scheduler(optimizer, config)
@@ -35,13 +38,12 @@ def run(config, train_data, valid_data):
 
         ### TRAIN
         train_acc, train_loss = train(
-            train_loader, pre_model, model, optimizer, scheduler, config
+            train_loader, model, optimizer, scheduler, config
         )
 
         ### VALID
-        acc = validate(valid_loader, pre_model, model, config)
+        acc = validate(valid_loader, model, config)
 
-        ### TODO: model save or early stopping
         wandb.log(
             {
                 "epoch": epoch,
@@ -52,7 +54,7 @@ def run(config, train_data, valid_data):
         )
         if acc > best_acc:
             best_acc = acc
-            # torch.nn.DataParallel로 감싸진 경우 원래의 model을 가져옵니다.
+            # torch.nn.DataParallel로 감싸진 경우 원래의 model을 가져옴
             model_to_save = model.module if hasattr(model, "module") else model
             save_checkpoint(
                 {
@@ -76,18 +78,17 @@ def run(config, train_data, valid_data):
             scheduler.step(best_acc)
 
 
-def train(train_loader, pre_model, model, optimizer, scheduler, config):
+def train(train_loader, model, optimizer, scheduler, config):
 
     model.train()
 
     total_loss = 0.
     total_correct = 0.
 
-    for step, (images, targets) in enumerate(train_loader):
-        images = images.to(config.device)
+    for step, (input, targets) in enumerate(train_loader):
+        input = input.to(config.device)
         targets = targets.to(config.device)
-        input = pre_model(images)
-        
+ 
         logits = model(input)
         _, preds = torch.max(logits, 1)
 
@@ -97,7 +98,7 @@ def train(train_loader, pre_model, model, optimizer, scheduler, config):
         if step % config.log_steps == 0:
             print(f"Training steps: {step} Loss: {str(loss.item())}")
 
-        total_loss += loss * images.size(0)
+        total_loss += loss * input.size(0)
         total_correct += torch.sum(preds == targets)
 
     # Train ACC
@@ -107,16 +108,15 @@ def train(train_loader, pre_model, model, optimizer, scheduler, config):
     return acc, loss_avg
 
 
-def validate(valid_loader, pre_model, model, config):
+def validate(valid_loader, model, config):
 
     model.eval()
 
     total_correct = 0.
 
-    for step, (images, targets) in enumerate(valid_loader):
-        images = images.to(config.device)
+    for step, (input, targets) in enumerate(valid_loader):
+        input = input.to(config.device)
         targets = targets.to(config.device)
-        input = pre_model(images)
         
         logits = model(input)
         _, preds = torch.max(logits, 1)

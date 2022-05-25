@@ -1,6 +1,7 @@
 import os
 
 import torch
+import numpy as np
 import wandb
 from config import parse_args
 import trainer
@@ -16,10 +17,9 @@ def main(config):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     config.device = device
 
-    preprocess = Preprocess(config)
-    preprocess.load_train_data(config.file_name)
-    train_data = preprocess.get_train_data()
-    train_data, valid_data = train_test_split(train_data, train_size=config.ratio, shuffle=True)
+    data_path = os.path.join(config.asset_dir, config.asset_file)
+    data = np.load(data_path) 
+    train_data, valid_data = train_test_split(data, train_size=config.ratio, shuffle=True)
 
     wandb.init(project="final_project", config=vars(config))
     trainer.run(config, train_data, valid_data)
@@ -28,4 +28,6 @@ def main(config):
 if __name__ == "__main__":
     config = parse_args()
     os.makedirs(config.model_dir, exist_ok=True)
+    data_path = os.path.join(config.asset_dir, config.asset_file)
+    data = np.load(data_path)
     main(config)
