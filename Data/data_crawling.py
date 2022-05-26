@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 import os, time
 import urllib.request
 import pandas as pd
@@ -7,15 +8,21 @@ def changeUrl(pagenum, category):
     url = "https://www.musinsa.com/category/" + category + "?d_cat_cd=" + category + "&brand=&rate=&page_kind=search&list_kind=small&sort=pop&sub_sort=&page=" + str(pagenum) + "&display_cnt=90&sale_goods=&group_sale=&kids=N&ex_soldout=&color=&price1=&price2=&exclusive_yn=&shoeSizeOption=&tags=&campaign_id=&timesale_yn=&q=&includeKeywords=&measure="
     return url
 
+options = Options()
+options.add_argument('--headless')
+options.add_argument('--no-sandbox')
+options.add_argument('--disable-dev-shm-usage')
+
 # Save crawling data to list
 result = list()
 
-driver = webdriver.Chrome('chromedriver.exe 절대 경로')
+driver = webdriver.Chrome(options=options, executable_path='./chromedriver')
 
 # ex) https://www.musinsa.com/category/003009
 category_list = ["022001","022002","022003"]
 
 for category in category_list:
+    print(category+" crawling start...")
     url = changeUrl(1, category)
     driver.get(url)
 
@@ -54,6 +61,7 @@ for category in category_list:
                 pass
 
 driver.close()
+print("close driver...")
 
 # change list to dataframe
 data = pd.DataFrame(result)
