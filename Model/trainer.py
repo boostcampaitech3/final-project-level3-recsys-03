@@ -5,16 +5,20 @@ import numpy as np
 import torch
 import wandb
 
-from dataloader import get_loaders
+from dataloader import get_loaders, get_transforms
 from model import NeuralNetwork
 from optimizer import get_optimizer
 from scheduler import get_scheduler
-from feature_extraction import get_pretrained_model
+from feature_extraction import get_pretrained_model, get_extraction
 from utils import get_similarity, draw
 
 
 def run(config, train_data, valid_data):
     train_loader, valid_loader = get_loaders(config, train_data, valid_data)
+    
+    # hidden, output dimension을 데이터에 맞게 적용
+    config.hidden_dim = train_data[:, :-1].shape[1]
+    config.output_dim = int(max(train_data[:,-1])) + 1  # 0부터 시작하므로 갯수는 +1 해줌
 
     # only when using warmup scheduler
     config.total_steps = int(math.ceil(len(train_loader.dataset) / config.batch_size)) * (
@@ -22,7 +26,6 @@ def run(config, train_data, valid_data):
     )
     config.warmup_steps = config.total_steps // 10
 
-    pre_model = get_pretrained_model(config)
     model = get_model(config)
     optimizer = get_optimizer(model, config)
     scheduler = get_scheduler(optimizer, config)
@@ -35,13 +38,12 @@ def run(config, train_data, valid_data):
 
         ### TRAIN
         train_acc, train_loss = train(
-            train_loader, pre_model, model, optimizer, scheduler, config
+            train_loader, model, optimizer, scheduler, config
         )
 
         ### VALID
-        acc = validate(valid_loader, pre_model, model, config)
+        acc = validate(valid_loader, model, config)
 
-        ### TODO: model save or early stopping
         wandb.log(
             {
                 "epoch": epoch,
@@ -52,7 +54,7 @@ def run(config, train_data, valid_data):
         )
         if acc > best_acc:
             best_acc = acc
-            # torch.nn.DataParallel로 감싸진 경우 원래의 model을 가져옵니다.
+            # torch.nn.DataParallel로 감싸진 경우 원래의 model을 가져옴
             model_to_save = model.module if hasattr(model, "module") else model
             save_checkpoint(
                 {
@@ -60,7 +62,7 @@ def run(config, train_data, valid_data):
                     "state_dict": model_to_save.state_dict(),
                 },
                 config.model_dir,
-                "model.pt",
+                config.model_name,
             )
             early_stopping_counter = 0
         else:
@@ -76,18 +78,17 @@ def run(config, train_data, valid_data):
             scheduler.step(best_acc)
 
 
-def train(train_loader, pre_model, model, optimizer, scheduler, config):
+def train(train_loader, model, optimizer, scheduler, config):
 
     model.train()
 
     total_loss = 0.
     total_correct = 0.
 
-    for step, (images, targets) in enumerate(train_loader):
-        images = images.to(config.device)
+    for step, (input, targets) in enumerate(train_loader):
+        input = input.to(config.device)
         targets = targets.to(config.device)
-        input = pre_model(images)
-        
+ 
         logits = model(input)
         _, preds = torch.max(logits, 1)
 
@@ -97,7 +98,7 @@ def train(train_loader, pre_model, model, optimizer, scheduler, config):
         if step % config.log_steps == 0:
             print(f"Training steps: {step} Loss: {str(loss.item())}")
 
-        total_loss += loss * images.size(0)
+        total_loss += loss * input.size(0)
         total_correct += torch.sum(preds == targets)
 
     # Train ACC
@@ -107,16 +108,15 @@ def train(train_loader, pre_model, model, optimizer, scheduler, config):
     return acc, loss_avg
 
 
-def validate(valid_loader, pre_model, model, config):
+def validate(valid_loader, model, config):
 
     model.eval()
 
     total_correct = 0.
 
-    for step, (images, targets) in enumerate(valid_loader):
-        images = images.to(config.device)
+    for step, (input, targets) in enumerate(valid_loader):
+        input = input.to(config.device)
         targets = targets.to(config.device)
-        input = pre_model(images)
         
         logits = model(input)
         _, preds = torch.max(logits, 1)
@@ -131,38 +131,37 @@ def validate(valid_loader, pre_model, model, config):
     return acc
 
 
-def inference(config, test_data, train_data):
-    # test image를 feature extraction하여 target을 예측
+def inference(config, image_path, extracted_data, path_list):
+    """
+    test image를 feature extraction하여 target을 예측
+    
+    Parameters:
+    image_path(dtype=str): test data path
+    extracted_data(dtype=np.array) : feature extraction된 data, label, path
+    path_list(dtype=list) : path가 담겨진 list
+    """
+    transform = get_transforms()
     pre_model = get_pretrained_model(config)
     model = load_model(config)
+    sim_method = get_similarity(config)
 
     model.eval()
 
-    input = pre_model(test_data.unsqueeze(dim=0).to(config.device))
-    logits = model(input)
-    _, preds = torch.max(logits, 1)
+    with torch.no_grad():
+        # input은 이미 cuda가 적용된 변수(dtype=torch.cuda.FloatTensor)
+        input = get_extraction(config, image_path, transform, pre_model)
+        logits = model(input)
+        _, preds = torch.max(logits, 1)
 
-    print("predict :", config.id2product[int(preds)])
+        print("predict :", config.id2product[int(preds)])
 
-    # similarity를 구하기 위해서 train dataset 사용
-    # 같은 label을 갖는 데이터셋을 dataloader에 넣어서 batch 단위로 simialrity 계산
-    dataset = train_data[train_data["label"]==int(preds)]
+        # similarity를 구함
+        data = torch.tensor(extracted_data[:,:-1])
+        total_similarity = sim_method(input, data.to(config.device))
 
-    _, test_loader = get_loaders(config, None, dataset)
-
-    sim_method = get_similarity(config)
-    total_similarity = torch.tensor([]).to(config.device)
-
-    for step, (images, _) in enumerate(test_loader):
-        images = images.to(config.device)
-        features = pre_model(images)
-        
-        similarity_tensor = sim_method(input, features)
-        total_similarity = torch.cat([total_similarity, similarity_tensor], dim=0)
-
-    # total_similarity 중 가장 similiarity가 높은 data k개의 path로 image 생성
-    topk_idx = np.array(torch.topk(total_similarity, config.k)[1].to('cpu'))
-    topk_path = dataset.iloc[topk_idx].path.values
+        # total_similarity 중 가장 similiarity가 높은 data k개의 path로 image 생성
+        topk_idx = np.array(torch.topk(total_similarity, config.k)[1].to('cpu'))
+        topk_path = np.array(path_list)[topk_idx]
 
     draw(config, topk_path)
 

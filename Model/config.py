@@ -18,16 +18,25 @@ def parse_args():
         "--data_dir", default="/opt/ml/h-and-m-personalized-fashion-recommendations/data", type=str, help="data directory"
     )
     parser.add_argument(
+        "--file_name", default="articles.csv", type=str, help="train file name"
+    )
+    parser.add_argument(
         "--asset_dir", default="/opt/ml/h-and-m-personalized-fashion-recommendations/asset/", type=str, help="data directory"
     )
     parser.add_argument(
-        "--file_name", default="articles.csv", type=str, help="train file name"
+        "--asset_file", default="fe_data.npy", type=str, help="extracted data file name"
+    )
+    parser.add_argument(
+        "--class_file", default="id2product.pickle", type=str, help="class dictionary file name"
+    )
+    parser.add_argument(
+        "--path_file", default="path_list.pickle", type=str, help="class dictionary file name"
     )
     parser.add_argument(
         "--model_dir", default="/opt/ml/h-and-m-personalized-fashion-recommendations/models/", type=str, help="model directory"
     )
     parser.add_argument(
-        "--model_name", default="model.pt", type=str, help="model file name"
+        "--model_name", default="test_model.pt", type=str, help="model file name"
     )
     parser.add_argument(
         "--test_dir", default="/opt/ml/h-and-m-personalized-fashion-recommendations/test/", type=str, help="test file directory"
@@ -44,7 +53,7 @@ def parse_args():
 
     # preprocess
     parser.add_argument(
-        "--ratio", default=0.7, type=float, help="the proportion of the train dataset"
+        "--ratio", default=0.8, type=float, help="the proportion of the train dataset"
     )
     parser.add_argument(
         "--limit_num", default=1000, type=int, help="number of images per class"
@@ -63,17 +72,24 @@ def parse_args():
     parser.add_argument(
         "--pre_model", default='resnet34', type=str, help="Limit the number of data augmentation per user"
     )
-    parser.add_argument("--model", default="mlp", type=str, help="model type")
     parser.add_argument(
-        "--hidden_dim", default=512, type=int, help="hidden dimension size") 
+        "--model", default="mlp", type=str, help="model type"
+    )
     parser.add_argument(
-        "--output_dim", default=10, type=int, help="output dimension size") 
-    parser.add_argument("--drop_out", default=0.3, type=float, help="drop out rate")
+        "--hidden_dim", default=512, type=int, help="hidden dimension size"
+    ) 
+    parser.add_argument(
+        "--output_dim", default=55, type=int, help="output dimension size"
+    ) 
+    parser.add_argument(
+        "--drop_out", default=0.3, type=float, help="drop out rate"
+    )
 
     # train
-    parser.add_argument("--n_epochs", default=1, type=int, help="number of epochs")
+    parser.add_argument("--n_epochs", default=20, type=int, help="number of epochs")
     parser.add_argument("--batch_size", default=32, type=int, help="batch size")
     parser.add_argument("--optimizer", default="adam", type=str, help="optimizer type")
+    parser.add_argument("--w_decay", default=1e-3, type=float, help="weight decay")
     parser.add_argument("--lr", default=0.0005, type=float, help="learning rate")
     parser.add_argument("--clip_grad", default=10, type=int, help="clip grad")
     parser.add_argument("--patience", default=10, type=int, help="for early stopping")
