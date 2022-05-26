@@ -1,3 +1,4 @@
+from xml.etree.ElementInclude import default_loader
 import pandas as pd
 import numpy as np
 import streamlit as st
@@ -7,8 +8,20 @@ from PIL import Image
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 import io
 import time
+import argparse
 
-backend = "http://fastapi:8000/"
+from yaml import parse
+
+parser = argparse.ArgumentParser(description="--docker=True/False, default=False")
+docker_choices = ('True', 'Fasle')
+parser.add_argument('--docker', choices=docker_choices, default='False', help="--docker=True/False, default=False")
+
+args = parser.parse_args()
+
+if args.docker=='False':
+    backend = "http://localhost:8000/"
+elif args.docker=='True':
+    backend = "http://fastapit:8000/"
 
 def getData(category, img_file, server_url = backend + 'getSimilarFashion'):
     # m = MultipartEncoder(fields={"category": category, "file": ("filename", img_file, "image/jpeg")}) # category 추가시 충돌 버그
