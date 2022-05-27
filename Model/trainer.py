@@ -163,7 +163,7 @@ def inference(config, image_path, extracted_data, path_list):
         topk_idx = np.array(torch.topk(total_similarity, config.k)[1].to('cpu'))
         topk_path = np.array(path_list)[topk_idx]
 
-    draw(config, topk_path)
+    return topk_path
 
 
 def get_model(config):
