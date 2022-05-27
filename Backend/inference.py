@@ -1,6 +1,6 @@
-# import sys
-# sys.path.append('../Model')
-# from inference import main
+import sys
+sys.path.append('../Model/')
+import inference
 import subprocess
 
 def get_similar_fashion_model(image): # 이미지 찾기
