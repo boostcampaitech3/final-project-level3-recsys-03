@@ -79,7 +79,7 @@ def parse_args():
         "--hidden_dim", default=512, type=int, help="hidden dimension size"
     ) 
     parser.add_argument(
-        "--output_dim", default=55, type=int, help="output dimension size"
+        "--output_dim", default=13, type=int, help="output dimension size"
     ) 
     parser.add_argument(
         "--drop_out", default=0.3, type=float, help="drop out rate"
