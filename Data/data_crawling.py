@@ -1,72 +1,87 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+
+from selenium.webdriver.common.by import By
 import os, time
 import urllib.request
-import pandas as pd
-
-def changeUrl(pagenum, category):
-    url = "https://www.musinsa.com/category/" + category + "?d_cat_cd=" + category + "&brand=&rate=&page_kind=search&list_kind=small&sort=pop&sub_sort=&page=" + str(pagenum) + "&display_cnt=90&sale_goods=&group_sale=&kids=N&ex_soldout=&color=&price1=&price2=&exclusive_yn=&shoeSizeOption=&tags=&campaign_id=&timesale_yn=&q=&includeKeywords=&measure="
-    return url
+import csv
 
 options = Options()
 options.add_argument('--headless')
 options.add_argument('--no-sandbox')
 options.add_argument('--disable-dev-shm-usage')
 
-# Save crawling data to list
-result = list()
+driver = webdriver.Chrome(options=options, service=Service('./chromedriver'))
 
-driver = webdriver.Chrome(options=options, executable_path='./chromedriver')
+def changeUrl(pagenum, category):
+    url = "https://www.musinsa.com/category/" + category + "?d_cat_cd=" + category + "&brand=&rate=&page_kind=search&list_kind=small&sort=pop&sub_sort=&page=" + str(pagenum) + "&display_cnt=90&sale_goods=&group_sale=&kids=N&ex_soldout=&color=&price1=&price2=&exclusive_yn=&shoeSizeOption=&tags=&campaign_id=&timesale_yn=&q=&includeKeywords=&measure="
+    return url
+
+def get_category_items(category_list):
+    
+    # Save dataframe to csv
+    f = open("data.csv",'w')
+    data_csv = csv.writer(f)
+    data_csv.writerow(['article_id', 'category', 'brand', 'title', 'price', 'item_url', 'img_url'])
+    
+    for category in category_list:
+
+        print(category+" crawling start...")
+
+        url = changeUrl(1, category)
+        driver.get(url)
+
+        # make directory
+        output_save_folder_path = './images/'+category+'/'
+        if not os.path.exists(output_save_folder_path):
+            os.makedirs(output_save_folder_path)
+
+        for i in range(10):
+            url =  changeUrl(i+1, category)
+            driver.get(url)
+            
+            items = driver.find_elements(By.CLASS_NAME,'li_box')
+
+            for item in items:
+                try:
+                    time.sleep(0.5)
+                    
+                    item_info = item.find_element(By.CLASS_NAME,'li_inner')
+                    
+                    img = item_info.find_element(By.CLASS_NAME,'list_img')
+                    
+                    goods = img.find_element(By.TAG_NAME,'a')
+                    goods_link = goods.get_attribute('href')
+                    goods_title = goods.get_attribute('title')
+
+                    #get 500x600 image url
+                    img_info = goods.find_element(By.CSS_SELECTOR,'.lazyload.lazy')
+                    imgUrl = img_info.get_attribute('data-original')
+                    imgUrl = imgUrl.replace('_125','_500')
+
+                    article = item_info.find_element(By.CLASS_NAME,'article_info')
+                    
+                    brand = article.find_element(By.CLASS_NAME,'item_title').text
+                    price = article.find_element(By.CLASS_NAME,'price').text.split()
+                    
+                    data_no = item.get_attribute('data-no')
+                    article_id = category + data_no
+
+                    data_csv.writerow([article_id, category, brand, goods_title, price[0], goods_link, imgUrl])
+                    
+                    urllib.request.urlretrieve(imgUrl, output_save_folder_path + article_id + ".jpg")
+                    
+                except Exception as NoSuchElementException:
+                    pass
+            print(f'{category} {i+1}page end....')        
+    driver.close()
+    print("close driver...")
+
+
 
 # ex) https://www.musinsa.com/category/003009
 category_list = ["022001","022002","022003"]
 
-for category in category_list:
-    print(category+" crawling start...")
-    url = changeUrl(1, category)
-    driver.get(url)
-
-    # make directory
-    output_save_folder_path = './images/'+category+'/'
-
-    if not os.path.exists(output_save_folder_path):
-        os.makedirs(output_save_folder_path)
-
-    for i in range(10):
-        url =  changeUrl(i+1, category)
-        driver.get(url)
-        
-        items = driver.find_elements_by_class_name('li_box')
-
-        for item in items:
-            try:
-                time.sleep(0.5)
-                img = item.find_element_by_class_name('lazyload.lazy')
-                imgUrl = img.get_attribute('data-original')
-                data_no = item.get_attribute('data-no')
-                article_id = category + data_no
-                img_info = item.find_element_by_class_name('img-block')
-                data_href = img_info.get_attribute('href')
-                title = img_info.get_attribute('title')
-                article_info = item.find_element_by_class_name('article_info')
-                brand = article_info.find_element_by_class_name('item_title').text
-                price = article_info.find_element_by_class_name('price').text.split()
-                
-                result.append([article_id, category, brand, title, price[0], data_href, imgUrl])
-                
-                urllib.request.urlretrieve(imgUrl, output_save_folder_path + category + data_no + ".jpg")
-                
-            except Exception as e:
-                print(e)
-                pass
-
-driver.close()
-print("close driver...")
-
-# change list to dataframe
-data = pd.DataFrame(result)
-# Change column name
-data.columns = ['article_id', 'category', 'brand', 'title', 'price', 'item_url', 'img_url']
-# Save dataframe to csv
-data.to_csv('data.csv')
-print("save crawling data to csv")
+# Save crawling data to list
+result = get_category_items(category_list)
