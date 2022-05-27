@@ -28,7 +28,7 @@ def main(config):
     data_path = os.path.join(config.asset_dir, config.asset_file)
     extracted_data = np.load(data_path)
 
-    trainer.inference(config, image_path, extracted_data, path_list)
+    return trainer.inference(config, image_path, extracted_data, path_list)
 
 
 if __name__ == "__main__":
