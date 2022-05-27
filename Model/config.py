@@ -79,17 +79,17 @@ def parse_args():
         "--hidden_dim", default=512, type=int, help="hidden dimension size"
     ) 
     parser.add_argument(
-        "--output_dim", default=55, type=int, help="output dimension size"
+        "--output_dim", default=13, type=int, help="output dimension size"
     ) 
     parser.add_argument(
         "--drop_out", default=0.3, type=float, help="drop out rate"
     )
 
     # train
-    parser.add_argument("--n_epochs", default=20, type=int, help="number of epochs")
+    parser.add_argument("--n_epochs", default=30, type=int, help="number of epochs")
     parser.add_argument("--batch_size", default=32, type=int, help="batch size")
     parser.add_argument("--optimizer", default="adam", type=str, help="optimizer type")
-    parser.add_argument("--w_decay", default=1e-3, type=float, help="weight decay")
+    parser.add_argument("--w_decay", default=1e-5, type=float, help="weight decay")
     parser.add_argument("--lr", default=0.0005, type=float, help="learning rate")
     parser.add_argument("--clip_grad", default=10, type=int, help="clip grad")
     parser.add_argument("--patience", default=10, type=int, help="for early stopping")

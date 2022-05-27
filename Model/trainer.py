@@ -111,17 +111,17 @@ def train(train_loader, model, optimizer, scheduler, config):
 def validate(valid_loader, model, config):
 
     model.eval()
-
     total_correct = 0.
+    
+    with torch.no_grad():
+        for step, (input, targets) in enumerate(valid_loader):
+            input = input.to(config.device)
+            targets = targets.to(config.device)
+            
+            logits = model(input)
+            _, preds = torch.max(logits, 1)
 
-    for step, (input, targets) in enumerate(valid_loader):
-        input = input.to(config.device)
-        targets = targets.to(config.device)
-        
-        logits = model(input)
-        _, preds = torch.max(logits, 1)
-
-        total_correct += torch.sum(preds == targets)
+            total_correct += torch.sum(preds == targets)
 
     # Valid ACC
     acc = total_correct / len(valid_loader.dataset)
@@ -145,6 +145,7 @@ def inference(config, image_path, extracted_data, path_list):
     model = load_model(config)
     sim_method = get_similarity(config)
 
+    pre_model.eval()
     model.eval()
 
     with torch.no_grad():
