@@ -21,7 +21,7 @@ def changeUrl(pagenum, category):
 def get_category_items(category_list):
     
     # Save dataframe to csv
-    f = open("data.csv",'w')
+    f = open("data.csv",'w',encoding='utf8')
     data_csv = csv.writer(f)
     data_csv.writerow(['article_id', 'category', 'brand', 'title', 'price', 'item_url', 'img_url'])
     
