@@ -153,7 +153,7 @@ def inference(config, image_path, extracted_data, path_list):
         logits = model(input)
         _, preds = torch.max(logits, 1)
 
-        print("predict :", config.id2product[int(preds)])
+        category = config.id2product[int(preds)]
 
         # similarity를 구함
         data = torch.tensor(extracted_data[:,:-1])
@@ -163,7 +163,7 @@ def inference(config, image_path, extracted_data, path_list):
         topk_idx = np.array(torch.topk(total_similarity, config.k)[1].to('cpu'))
         topk_path = np.array(path_list)[topk_idx]
 
-    return topk_path
+    return (category,topk_path)
 
 
 def get_model(config):
