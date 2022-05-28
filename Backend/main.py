@@ -3,7 +3,7 @@ import uvicorn
 from starlette.responses import Response
 from infer import get_similar_fashion_model, get_category_model
 import io
-
+from PIL import Image
     
 app = FastAPI()
 
@@ -24,9 +24,13 @@ def read_root():
 
 @app.post("/getSimilarFashion")
 def get_similar_fashion(file: bytes = File(...)):
-	similar_fashion_list = get_similar_fashion_model(image=file)
+	img = io.BytesIO(file)
+	img = Image.open(img)
+	img = img.convert("RGB")
+	img.save('/opt/ml/h-and-m-personalized-fashion-recommendations/test_img.jpg')
+	category,similar_fashion_list = get_similar_fashion_model(image=file)
 
-	return {"image0" : similar_fashion_list[0], "image1" : similar_fashion_list[1], "image2" : similar_fashion_list[2], "image3" : similar_fashion_list[3]}
+	return {'category' : category, "image0" : similar_fashion_list[0], "image1" : similar_fashion_list[1], "image2" : similar_fashion_list[2], "image3" : similar_fashion_list[3], "image4" : similar_fashion_list[4]}
 
 
 @app.post("/getCategory")
