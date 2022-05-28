@@ -23,7 +23,7 @@ if args.docker=='False':
 elif args.docker=='True':
     backend = "http://fastapit:8000/"
 
-def getData(category, img_file, server_url = backend + 'getSimilarFashion'):
+def getData(img_file, server_url = backend + 'getSimilarFashion'):
     # m = MultipartEncoder(fields={"category": category, "file": ("filename", img_file, "image/jpeg")}) # category 추가시 충돌 버그
     m = MultipartEncoder(fields={"file": ("filename", img_file, "image/jpeg")})
 
@@ -58,12 +58,7 @@ if img_file:
     image = cropped_img.thumbnail((500,500))
     st.image(cropped_img)
 
-# 옷 종류 select 기능
-category = '티셔츠'
-category = st.selectbox('옷 종류',
-                    ('티셔츠', '바지', '신발', '모자', '추가 예정'))
 
-st.write('You selected:', category)
 
 # 업로드 버튼을 누를 시 crop된 이미지를 확인, backend로 post 후에 image가 있는 dict를 받아옴
 if st.button("업로드 완료"):
@@ -71,25 +66,34 @@ if st.button("업로드 완료"):
         img_np_array = img_file
         # ConnectionError: HTTPConnectionPool 방지
         try:
-            result = getData(category, img_np_array) 
+            result = getData(img_np_array) 
             pass
         except:
             time.sleep(2)
-            result = getData(category, img_np_array)
-        col1, col2, col3, col4 = st.columns(4)
-        col1.header("image0")
+            result = getData(img_np_array)
+        st.write('옷 종류:', result.json()["category"])
+        col1, col2, col3, col4 ,col5 = st.columns(5)
+        col1.header("이미지1")
         col1.image(result.json()["image0"], use_column_width=True)
-        col2.header("image1")
+        col2.header("이미지2")
         col2.image(result.json()["image1"], use_column_width=True)
-        col3.header("image2")
+        col3.header("이미지3")
         col3.image(result.json()["image2"], use_column_width=True)
-        col4.header("image3")
+        col4.header("이미지4")
         col4.image(result.json()["image3"], use_column_width=True)
+        col5.header("이미지5")
+        col5.image(result.json()["image4"], use_column_width=True)
 
     else:
         st.write("좌측에서 이미지를 넣어주세요.")
 
+
+
 # 이후 추가될 기능
-st.write("무언가가 진행될 예정")
 
+# # 옷 종류 select 기능
+# category = '티셔츠'
+# category = st.selectbox('옷 종류',
+#                     ('티셔츠', '바지', '신발', '모자', '추가 예정'))
 
+# st.write('You selected:', category)
