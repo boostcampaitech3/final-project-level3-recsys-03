@@ -1,10 +1,10 @@
 import sys
-sys.path.append('../Model/')
-import inference
-import subprocess
+import os
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+from Model import config, inference
 
 def get_similar_fashion_model(image): # 이미지 찾기
-
+    # conf = config.parse_args()
 
     '''
     model = Model(category) # 카테고리에 맞는 모델 불러오기
@@ -13,8 +13,6 @@ def get_similar_fashion_model(image): # 이미지 찾기
     img_URL_list = csv[image_IDs]['image_URL'] # CSV 파일에서 해당 이미지의 URL을 불러온다
     '''
     img_list = []
-    k = subprocess.check_output("python Model/inference.py", shell=True)
-    print(k)
     # 임시로 만든 img_URL_list
     img_URL_list = ["https://image.msscdn.net/images/goods_img/20210401/1875663/1875663_1_500.jpg?t=20210401170705", 
     "https://image.msscdn.net/images/goods_img/20220302/2392494/2392494_1_500.jpg?t=20220428143207", 

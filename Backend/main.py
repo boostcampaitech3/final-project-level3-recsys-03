@@ -1,7 +1,7 @@
 from fastapi import FastAPI, File
 import uvicorn
 from starlette.responses import Response
-from inference import get_similar_fashion_model, get_category_model
+from infer import get_similar_fashion_model, get_category_model
 import io
 
     
