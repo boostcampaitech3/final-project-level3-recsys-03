@@ -61,8 +61,8 @@ def get_category_items(category_list):
                     imgUrl = imgUrl.replace('_125','_500')
 
                     article = item_info.find_element(By.CLASS_NAME,'article_info')
-                    
-                    brand = article.find_element(By.CLASS_NAME,'item_title').text
+                                        
+                    brand = article.find_element(By.CLASS_NAME,'item_title').find_element(By.TAG_NAME,'a').text
                     price = article.find_element(By.CLASS_NAME,'price').text.split()
                     
                     data_no = item.get_attribute('data-no')
