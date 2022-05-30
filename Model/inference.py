@@ -4,8 +4,8 @@ import pickle
 import torch
 import numpy as np
 
-from config import parse_args
-import trainer
+from .config import parse_args
+from Model import trainer
 
 
 def main(config):
@@ -28,7 +28,7 @@ def main(config):
     data_path = os.path.join(config.asset_dir, config.asset_file)
     extracted_data = np.load(data_path)
 
-    trainer.inference(config, image_path, extracted_data, path_list)
+    return trainer.inference(config, image_path, extracted_data, path_list)
 
 
 if __name__ == "__main__":

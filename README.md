@@ -13,3 +13,12 @@ docker-compose up
 ```
 docker-compose down
 ```
+
+### without docker
+```
+cd Backend/
+python main.py
+
+cd ../Frontend
+streamlit run demo.py
+```
