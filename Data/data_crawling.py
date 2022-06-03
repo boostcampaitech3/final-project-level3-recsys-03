@@ -18,10 +18,6 @@ options.add_argument('--disable-dev-shm-usage')
 
 driver = webdriver.Chrome(options=options, service=Service('/opt/ml/chromedriver'))
 
-cd = service_account.Credentials.from_service_account_file('/opt/ml/final-project-level3-recsys-03/Data/clear-shell-351201-702c702ea7fc.json')
-project_id = 'clear-shell-351201'
-destination_table = 'musinsadb.articles'
-
 def changeUrl(pagenum, category):
     url = "https://www.musinsa.com/category/" + category + "?d_cat_cd=" + category + "&brand=&rate=&page_kind=search&list_kind=small&sort=pop&sub_sort=&page=" + str(pagenum) + "&display_cnt=90&sale_goods=&group_sale=&kids=N&ex_soldout=&color=&price1=&price2=&exclusive_yn=&shoeSizeOption=&tags=&campaign_id=&timesale_yn=&q=&includeKeywords=&measure="
     return url
@@ -92,4 +88,4 @@ def get_category_items(category_list):
 category_list = ["022001","022002","022003"]
 
 result = get_category_items(category_list)
-load_to_bigquery(result,'musinsadb.features')
+load_to_bigquery(result,'musinsadb.articles')
