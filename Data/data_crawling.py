@@ -5,14 +5,22 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 import os, time
 import urllib.request
-import csv
+
+from google.oauth2 import service_account
+import pandas as pd
+
+from data_load import load_to_bigquery
 
 options = Options()
 options.add_argument('--headless')
 options.add_argument('--no-sandbox')
 options.add_argument('--disable-dev-shm-usage')
 
-driver = webdriver.Chrome(options=options, service=Service('./chromedriver'))
+driver = webdriver.Chrome(options=options, service=Service('/opt/ml/chromedriver'))
+
+cd = service_account.Credentials.from_service_account_file('/opt/ml/final-project-level3-recsys-03/Data/clear-shell-351201-702c702ea7fc.json')
+project_id = 'clear-shell-351201'
+destination_table = 'musinsadb.articles'
 
 def changeUrl(pagenum, category):
     url = "https://www.musinsa.com/category/" + category + "?d_cat_cd=" + category + "&brand=&rate=&page_kind=search&list_kind=small&sort=pop&sub_sort=&page=" + str(pagenum) + "&display_cnt=90&sale_goods=&group_sale=&kids=N&ex_soldout=&color=&price1=&price2=&exclusive_yn=&shoeSizeOption=&tags=&campaign_id=&timesale_yn=&q=&includeKeywords=&measure="
@@ -20,10 +28,7 @@ def changeUrl(pagenum, category):
 
 def get_category_items(category_list):
     
-    # Save dataframe to csv
-    f = open("data.csv",'w',encoding='utf8')
-    data_csv = csv.writer(f)
-    data_csv.writerow(['article_id', 'category', 'brand', 'title', 'price', 'item_url', 'img_url'])
+    data = list()
     
     for category in category_list:
 
@@ -61,27 +66,30 @@ def get_category_items(category_list):
                     imgUrl = imgUrl.replace('_125','_500')
 
                     article = item_info.find_element(By.CLASS_NAME,'article_info')
-                                        
+                    
                     brand = article.find_element(By.CLASS_NAME,'item_title').find_element(By.TAG_NAME,'a').text
                     price = article.find_element(By.CLASS_NAME,'price').text.split()
                     
                     data_no = item.get_attribute('data-no')
                     article_id = category + data_no
 
-                    data_csv.writerow([article_id, category, brand, goods_title, price[0], goods_link, imgUrl])
+                    data.append([article_id, category, brand, goods_title, price[0], goods_link, imgUrl])
                     
                     urllib.request.urlretrieve(imgUrl, output_save_folder_path + article_id + ".jpg")
                     
                 except Exception as NoSuchElementException:
                     pass
+
             print(f'{category} {i+1}page end....')        
+
     driver.close()
     print("close driver...")
-
+    df = pd.DataFrame(data=data, columns=['article_id', 'category', 'brand', 'title', 'price', 'item_url', 'img_url'])
+    return df
 
 
 # ex) https://www.musinsa.com/category/003009
 category_list = ["022001","022002","022003"]
 
-# Save crawling data to list
 result = get_category_items(category_list)
+load_to_bigquery(result,'musinsadb.features')
