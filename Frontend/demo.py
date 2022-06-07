@@ -63,14 +63,15 @@ if img_file:
 # 업로드 버튼을 누를 시 crop된 이미지를 확인, backend로 post 후에 image가 있는 dict를 받아옴
 if st.button("업로드 완료"):
     if cropped_img :
-        img_np_array = img_file
-        # ConnectionError: HTTPConnectionPool 방지
-        try:
-            result = getData(img_np_array) 
-            pass
-        except:
-            time.sleep(2)
-            result = getData(img_np_array)
+        with st.spinner('로딩중...'):
+            img_np_array = img_file
+            # ConnectionError: HTTPConnectionPool 방지
+            try:
+                result = getData(img_np_array) 
+                pass
+            except:
+                time.sleep(2)
+                result = getData(img_np_array)
         st.write('옷 종류:', result.json()["category"])
         col1, col2, col3, col4 ,col5 = st.columns(5)
         col1.header("이미지1")
@@ -83,7 +84,6 @@ if st.button("업로드 완료"):
         col4.image(result.json()["image3"], use_column_width=True)
         col5.header("이미지5")
         col5.image(result.json()["image4"], use_column_width=True)
-
     else:
         st.write("좌측에서 이미지를 넣어주세요.")
 
