@@ -21,38 +21,7 @@
 
 ### 1) Project Tree
 
-final-project-level3-recsys-03
-├─ Backend
-│  ├─ dockerfile
-│  ├─ inference_backend.py
-│  ├─ main.py
-│  ├─ README.md
-│  └─ requirements.txt
-├─ Data
-│  ├─ data_crawling.ipynb
-│  └─ README.md
-├─ docker-compose.yml
-├─ Frontend
-│  ├─ demo.py
-│  ├─ Dockerfile
-│  ├─ README.md
-│  └─ requirements.txt
-├─ Model
-│  ├─ config.py
-│  ├─ dataloader.py
-│  ├─ feature_extraction.py
-│  ├─ feature_save.py
-│  ├─ inference.py
-│  ├─ model.py
-│  ├─ optimizer.py
-│  ├─ preprocess.py
-│  ├─ README.md
-│  ├─ scheduler.py
-│  ├─ train.py
-│  ├─ trainer.py
-│  └─ utils.py
-├─ README.md
-└─ requirements.txt
+![Project Tree](https://user-images.githubusercontent.com/91198452/172402471-c84bbbcc-1d4f-464d-9328-327a270d5b81.jpg)
 
 ### 2) System Architecture
 
