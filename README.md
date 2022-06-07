@@ -107,9 +107,6 @@
 
 ## 6️⃣ ****How to Run****
 
-
-## How to Run
-
 You need install [Docker](https://www.docker.com/) first
 ### run
 ```
