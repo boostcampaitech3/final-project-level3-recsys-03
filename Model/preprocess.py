@@ -67,8 +67,8 @@ def get_labels(config, df):
     df(dtype=object): image path가 추가된 pandas dataframe ("path" feaeture 생성)
     """
 
-    product_list = list(df["category"].drop_duplicates()) # number of categories = 25 
-    config.product2id = {w: i for i, w in enumerate(product_list)}
+    #product_list = list(df["category"].drop_duplicates()) # number of categories = 25 
+    #config.product2id = {w: i for i, w in enumerate(product_list)}
     df["label"] = df["category"].apply(lambda x: config.product2id[x])
 
     df = df.reset_index(drop=True)

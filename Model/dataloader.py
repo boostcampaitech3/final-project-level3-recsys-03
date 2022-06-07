@@ -68,8 +68,8 @@ class ExtractionDataset(torch.utils.data.Dataset):
     classfication 단게에서 사용
     """
     def __init__(self, img):
-        self.data = img[:, :-1]
-        self.label = img[:, -1]
+        self.data = img.iloc[:, 1:].values
+        self.label = img['label'].values
     
     def __getitem__(self, index):
         X = torch.tensor(self.data[index], dtype=torch.float32)

@@ -53,7 +53,31 @@ def parse_args():
         "--limit_num", default=1000, type=int, help="number of images per class"
     )
     parser.add_argument(
-        "--product2id", nargs="+", default={}, type=dict, help="dictionary that matches product names with ids"
+        "--product2id", nargs="+", default={1001: 0,
+                                            1002: 1,
+                                            1005: 2,
+                                            2003: 3,
+                                            2021: 4,
+                                            2025: 5,
+                                            3002: 6,
+                                            3007: 7,
+                                            3009: 8,
+                                            4001: 9,
+                                            4002: 10,
+                                            4013: 11,
+                                            5006: 12,
+                                            5012: 13,
+                                            5015: 14,
+                                            7001: 15,
+                                            7004: 16,
+                                            7005: 17,
+                                            18003: 18,
+                                            20006: 19,
+                                            20007: 20,
+                                            20008: 21,
+                                            22001: 22,
+                                            22002: 23,
+                                            22003: 24}, type=dict, help="dictionary that matches product names with ids"
     )    
     parser.add_argument(
         "--id2product", nargs="+", default={0: "Top", 
@@ -97,7 +121,7 @@ def parse_args():
         "--hidden_dim", default=512, type=int, help="hidden dimension size"
     ) 
     parser.add_argument(
-        "--output_dim", default=13, type=int, help="output dimension size"
+        "--output_dim", default=25, type=int, help="output dimension size"
     ) 
     parser.add_argument(
         "--drop_out", default=0.3, type=float, help="drop out rate"
