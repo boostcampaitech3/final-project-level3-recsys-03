@@ -2,7 +2,7 @@ import os
 import random
 
 import numpy as np
-import pandas as pd
+import modin.pandas as pd
 import tqdm
 
 import torch
@@ -10,7 +10,7 @@ from torchvision import transforms
 from torchvision.transforms import Resize, ToTensor, Normalize, RandomHorizontalFlip
 from PIL import Image
 
-from .preprocess import get_preprocess
+from preprocess import get_preprocess
 
 
 class Preprocess:
