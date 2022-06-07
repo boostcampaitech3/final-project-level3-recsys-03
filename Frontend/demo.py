@@ -9,7 +9,6 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder
 import io
 import time
 import argparse
-
 from yaml import parse
 
 parser = argparse.ArgumentParser(description="--docker=True/False, default=False")
@@ -50,22 +49,20 @@ st.set_option('deprecation.showfileUploaderEncoding', False)
 st.header("사진 업로드")
 
 #사이드바에서 crop에 사용될 기능 설정(업로드 파일 형식/테두리 색상/image 비율 고정)
-img_file = st.sidebar.file_uploader(label='사진 업로드', type=['png', 'jpg'])
-box_color = st.sidebar.color_picker(label="테두리 색상", value='#000000')
+img_file = st.file_uploader(label='', type=['png', 'jpg'])
 aspect_ratio = None
+
 
 #이미지 업로드시 crop 기능 실행
 if img_file:
     img = Image.open(img_file)
-    cropped_img = st_cropper(img, realtime_update=True, box_color=box_color,
+    cropped_img = st_cropper(img, realtime_update=True, box_color='#000000',
                                 aspect_ratio=aspect_ratio)
     
     # crop된 이미지를 출력 
-    st.write("업로드 될 사진")
+    st.write('업로드 될 사진')
     image = cropped_img.thumbnail((500,500))
     st.image(cropped_img)
-
-
 
 # 업로드 버튼을 누를 시 crop된 이미지를 확인, backend로 post 후에 image가 있는 dict를 받아옴
 if st.button("업로드 완료"):
@@ -80,17 +77,16 @@ if st.button("업로드 완료"):
             except:
                 time.sleep(2)
                 result = getData(img_np_array)
+        
+        st.header("비슷한 이미지 결과")
         st.write('옷 종류:', result.json()["category"])
+        
         col1, col2, col3, col4 ,col5 = st.columns(5)
-        col1.header("이미지1")
+        
         col1.image(result.json()["image0"], use_column_width=True)
-        col2.header("이미지2")
         col2.image(result.json()["image1"], use_column_width=True)
-        col3.header("이미지3")
         col3.image(result.json()["image2"], use_column_width=True)
-        col4.header("이미지4")
         col4.image(result.json()["image3"], use_column_width=True)
-        col5.header("이미지5")
         col5.image(result.json()["image4"], use_column_width=True)
     else:
         st.write("좌측에서 이미지를 넣어주세요.")
