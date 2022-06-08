@@ -4,8 +4,8 @@ import pickle
 import torch
 import modin.pandas as pd
 
-from config import parse_args
-import trainer
+from .config import parse_args
+from Model import trainer
 
 
 def main(config):

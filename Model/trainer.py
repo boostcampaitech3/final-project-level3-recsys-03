@@ -5,12 +5,12 @@ import numpy as np
 import torch
 import wandb
 
-from dataloader import get_loaders, get_transforms
-from model import NeuralNetwork
-from optimizer import get_optimizer
-from scheduler import get_scheduler
-from feature_extraction import get_pretrained_model, get_extraction
-from utils import get_similarity, draw
+from .dataloader import get_loaders, get_transforms
+from .model import NeuralNetwork
+from .optimizer import get_optimizer
+from .scheduler import get_scheduler
+from .feature_extraction import get_pretrained_model, get_extraction
+from .utils import get_similarity, draw
 
 
 def run(config, train_data, valid_data):
