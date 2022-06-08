@@ -1,13 +1,15 @@
 import os
 import torch
 import numpy as np
-import modin.pandas as pd
+import pandas as pd
 
 from config import parse_args
 from dataloader import Preprocess
 from utils import setseeds
 from feature_extraction import get_data
-
+import sys
+sys.path.append('/opt/ml/final-project-level3-recsys-03/Data')
+import data_query
 
 def main(config):
 
@@ -19,15 +21,17 @@ def main(config):
     preprocess.load_train_data(config.file_name)
     train_data = preprocess.get_train_data()
 
+    print("saving train data ...")
+    data_path = os.path.join(config.asset_dir, config.asset_file)
+    train_data.to_csv(data_path, index=False) # csv 저장
+
     # feature extraction
     data = get_data(config, train_data)
 
-    # meta data, feature extraction된 data를 concatenate
-    train_df = pd.concat([train_data, data], axis=1)
+    to_bigquery = pd.read_csv("./img_features.csv")
+    data_query.load_features_to_bigquery(to_bigquery,'musinsadb.img_features')
 
-    print("saving data ...")
-    data_path = os.path.join(config.asset_dir, config.asset_file)
-    train_df.to_csv(data_path, index=False) # csv 저장
+
 
 if __name__ == "__main__":
     config = parse_args()

@@ -1,5 +1,5 @@
 import os
-import modin.pandas as pd
+import pandas as pd
 
 
 def get_img_path(path):

@@ -4,6 +4,8 @@ import os
 import numpy as np
 import torch
 import wandb
+import pandas as pd
+import csv
 
 from .dataloader import get_loaders, get_transforms
 from .model import NeuralNetwork
@@ -11,7 +13,9 @@ from .optimizer import get_optimizer
 from .scheduler import get_scheduler
 from .feature_extraction import get_pretrained_model, get_extraction
 from .utils import get_similarity, draw
-
+import sys
+sys.path.append('/opt/ml/final-project-level3-recsys-03/Data')
+import data_query
 
 def run(config, train_data, valid_data):
     train_loader, valid_loader = get_loaders(config, train_data, valid_data)
@@ -128,7 +132,7 @@ def validate(valid_loader, model, config):
     return acc
 
 
-def inference(config, image_path, extracted_data):
+def inference(config, image_path, articles):
     """
     test image를 feature extraction하여 target을 예측
     
@@ -144,6 +148,10 @@ def inference(config, image_path, extracted_data):
     pre_model.eval()
     model.eval()
 
+    f = open("target.csv",'w',encoding='utf8')
+    data_csv = csv.writer(f)
+    data_csv.writerow(['path', 'features'])
+    
     with torch.no_grad():
         # input은 이미 cuda가 적용된 변수(dtype=torch.cuda.FloatTensor)
         input = get_extraction(config, image_path, transform, pre_model)
@@ -152,18 +160,31 @@ def inference(config, image_path, extracted_data):
 
         category = config.id2product[int(preds)]
 
-        # similarity를 구함
-        data = torch.tensor(extracted_data.iloc[:,7:].values)
-        # "brand", "title", "price", "item_url", "img_url", "path", "label", "extraction_data"
-        total_similarity = sim_method(input, data.to(config.device))
+        input = torch.squeeze(input, dim=0)
 
-        # total_similarity 중 가장 similiarity가 높은 data k개 선정
-        topk_idx = np.array(torch.topk(total_similarity, config.k)[1].to('cpu'))
-        topk_data = extracted_data.iloc[topk_idx]
-        topk_title =topk_data["title"].values
-        topk_price = topk_data["price"].values
-        topk_item_url = topk_data["item_url"].values
-        topk_img_url = topk_data["img_url"].values
+        data_csv.writerow(['/opt/ml/' , input.cpu().detach().numpy().tolist()])
+        
+        data = pd.read_csv("./target.csv")
+        data_query.load_search_feature_to_bigquery(data,'musinsadb.target')
+        
+        df = data_query.cal_similarity()
+        print(df)
+
+        topk_path = np.array(df['key1'].values)
+        print(topk_path)
+
+        # # similarity를 구함
+        # data = torch.tensor(extracted_data.iloc[:,7:].values)
+        # # "brand", "title", "price", "item_url", "img_url", "path", "label", "extraction_data"
+        # total_similarity = sim_method(input, data.to(config.device))
+
+        # # total_similarity 중 가장 similiarity가 높은 data k개 선정
+        # topk_idx = np.array(torch.topk(total_similarity, config.k)[1].to('cpu'))
+        # topk_data = extracted_data.iloc[topk_idx]
+        # topk_title =topk_data["title"].values
+        # topk_price = topk_data["price"].values
+        # topk_item_url = topk_data["item_url"].values
+        # topk_img_url = topk_data["img_url"].values
 
     return (category, topk_title, topk_price, topk_item_url, topk_img_url)
 

@@ -2,11 +2,13 @@ import os
 import pickle
 
 import torch
-import modin.pandas as pd
+import pandas as pd
 
 from .config import parse_args
 from Model import trainer
-
+import sys
+sys.path.append('/opt/ml/final-project-level3-recsys-03/Data')
+import data_query
 
 def main(config):
     device = "cuda" if torch.cuda.is_available() else "cpu"

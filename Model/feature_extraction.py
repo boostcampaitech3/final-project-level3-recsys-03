@@ -2,9 +2,10 @@ from efficientnet_pytorch import EfficientNet
 import torchvision.models as models
 import torch
 import torch.nn as nn
+import csv
 
 from tqdm import tqdm
-import modin.pandas as pd
+import pandas as pd
 import numpy as np
 from rembg import remove
 from PIL import Image
@@ -80,9 +81,14 @@ def get_data(config, df):
     pre_model = get_pretrained_model(config)
     transform = get_transforms()
     pre_model.eval()
+
+    f = open("img_features.csv",'w',encoding='utf8')
+    data_csv = csv.writer(f)
+    data_csv.writerow(['path', 'features'])
     
     with torch.no_grad():
-        for idx in tqdm(range(len(path))):
+        #for idx in tqdm(range(len(path))):
+        for idx in tqdm(range(5)):
             extract_img = get_extraction(config, path[idx], transform, pre_model)
             # row로 data에 concat
             cpu_extract = extract_img.to('cpu')
@@ -90,6 +96,9 @@ def get_data(config, df):
             del extract_img
             torch.cuda.empty_cache()
             data = torch.cat([data, cpu_extract], dim=0)
+            
+            cpu_extract = torch.squeeze(cpu_extract, dim=0)
+            data_csv.writerow([path[idx] , cpu_extract.detach().numpy().tolist()])
 
     data = np.array(data)
 
