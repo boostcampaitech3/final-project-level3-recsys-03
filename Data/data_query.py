@@ -49,7 +49,7 @@ def load_features_to_bigquery(result,destination_table):
     load_to_bigquery(result,destination_table)
 
     query = """
-        CREATE OR REPLACE TABLE `clear-shell-351201.musinsadb.features5`
+        CREATE OR REPLACE TABLE `clear-shell-351201.musinsadb.img_features`
         AS
         SELECT
         path,
@@ -57,7 +57,7 @@ def load_features_to_bigquery(result,destination_table):
         SELECT ARRAY_AGG(CAST(v as FLOAT64) ORDER BY o asc)
         FROM UNNEST(SPLIT(REGEXP_EXTRACT(features, r"^\[(.*)\]$"), ", ")) v WITH OFFSET o
         ) AS features
-        FROM `clear-shell-351201.musinsadb.features5`
+        FROM `clear-shell-351201.musinsadb.img_features`
     """
     job = bq.query(query)    
     print(
@@ -79,7 +79,7 @@ def load_search_feature_to_bigquery(result,destination_table):
     load_to_bigquery(result,destination_table)
 
     query = """
-        CREATE OR REPLACE TABLE `clear-shell-351201.musinsadb.fsearch`
+        CREATE OR REPLACE TABLE `clear-shell-351201.musinsadb.target`
         AS
         SELECT
         path,
@@ -87,7 +87,7 @@ def load_search_feature_to_bigquery(result,destination_table):
         SELECT ARRAY_AGG(CAST(v as FLOAT64) ORDER BY o asc)
         FROM UNNEST(SPLIT(REGEXP_EXTRACT(features, r"^\[(.*)\]$"), ", ")) v WITH OFFSET o
         ) AS features
-        FROM `clear-shell-351201.musinsadb.fsearch`
+        FROM `clear-shell-351201.musinsadb.target`
     """
     job = bq.query(query)    
     print(
@@ -105,7 +105,7 @@ def cal_similarity():
     """
     query = """
             SELECT
-            t1.idx AS key1,
+            t1.path AS key1,
             t2.path AS key2,
             (
             SELECT
@@ -117,8 +117,8 @@ def cal_similarity():
             ON
                 pos1 = pos2 ) AS cosine_similarity
             FROM
-                musinsadb.features1 AS t1,
-                musinsadb.fsearch AS t2
+                musinsadb.img_features AS t1,
+                musinsadb.target AS t2
             ORDER BY 
                 cosine_similarity
             DESC

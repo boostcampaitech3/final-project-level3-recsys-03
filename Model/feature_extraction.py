@@ -87,8 +87,7 @@ def get_data(config, df):
     data_csv.writerow(['path', 'features'])
     
     with torch.no_grad():
-        #for idx in tqdm(range(len(path))):
-        for idx in tqdm(range(5)):
+        for idx in tqdm(range(len(path))):
             extract_img = get_extraction(config, path[idx], transform, pre_model)
             # row로 data에 concat
             cpu_extract = extract_img.to('cpu')

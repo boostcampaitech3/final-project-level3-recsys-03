@@ -9,7 +9,7 @@ import urllib.request
 from google.oauth2 import service_account
 import pandas as pd
 
-from data_load import load_to_bigquery
+from data_query import load_to_bigquery
 
 options = Options()
 options.add_argument('--headless')
