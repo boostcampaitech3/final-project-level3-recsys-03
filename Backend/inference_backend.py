@@ -14,12 +14,8 @@ def get_similar_fashion_model(image): # 이미지 찾기
     '''
     conf = config.parse_args()
     # 임시로 만든 img_URL_list
+
     category, topk_title, topk_price, topk_item_url, topk_img_url = inference.main(conf)
-    print(category)
-    print(topk_title)
-    print(topk_price)
-    print(topk_item_url)
-    print(topk_img_url)
     return (category, topk_title, topk_price, topk_item_url, topk_img_url)
 
 def get_category_model(image): # 카테고리 찾기

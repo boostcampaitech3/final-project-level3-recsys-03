@@ -29,7 +29,7 @@ def get_similar_fashion(file: bytes = File(...)):
 	img = img.convert("RGB")
 	img.save('/opt/ml/musinsa_dataset/test/test_img.jpg')
 	category, topk_title, topk_price, topk_item_url, topk_img_url = get_similar_fashion_model(image=file)
-	
+
 	return_dict = {}
 	return_dict['category'] = category
 	
