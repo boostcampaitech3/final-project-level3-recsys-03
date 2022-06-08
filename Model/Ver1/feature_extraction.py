@@ -4,11 +4,11 @@ import torch
 import torch.nn as nn
 
 from tqdm import tqdm
-import modin.pandas as pd
+import pandas as pd
 import numpy as np
 from rembg import remove
 from PIL import Image
-from dataloader import get_transforms
+from .dataloader import get_transforms
 
 
 class Identity(nn.Module):
@@ -70,12 +70,13 @@ def get_data(config, df):
     feature extraction하여 데이터 생성하는 함수
     
     Parameters:
-    df(dtype=object): 이미지에 대한 'path'를 가지고 있는 data frame
+    df(dtype=object): 이미지에 대한 'path', 'label'를 가지고 있는 data frame
     
     Returns:
-    data(dtype=np.array) : feature extraction된 data
+    data(dtype=np.array) : feature extraction된 data, label, path
     """
     path = df['path'].values
+    label = df['label'].values
     data = torch.tensor([], dtype=torch.float32)
     pre_model = get_pretrained_model(config)
     transform = get_transforms()
@@ -91,6 +92,7 @@ def get_data(config, df):
             torch.cuda.empty_cache()
             data = torch.cat([data, cpu_extract], dim=0)
 
-    data = np.array(data)
+    # label, path를 data에 column으로 concat
+    data = np.concatenate((np.array(data), label.reshape(-1, 1)), axis=1)
 
-    return pd.DataFrame(data)
+    return data

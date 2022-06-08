@@ -12,40 +12,34 @@ def parse_args():
         '--device', default='cuda' if torch.cuda.is_available() else 'cpu', type=str, help="cpu or gpu"
     )
     parser.add_argument(
-        "--img_dir", default="/opt/ml/h-and-m-personalized-fashion-recommendations/images/", type=str, help="data directory"
+        "--img_dir", default="/opt/ml/musinsa_dataset/images", type=str, help="data directory"
     )
     parser.add_argument(
-        "--data_dir", default="/opt/ml/h-and-m-personalized-fashion-recommendations/data", type=str, help="data directory"
+        "--data_dir", default="/opt/ml/musinsa_dataset/data", type=str, help="data directory"
     )
     parser.add_argument(
         "--file_name", default="articles.csv", type=str, help="train file name"
     )
     parser.add_argument(
-        "--asset_dir", default="/opt/ml/h-and-m-personalized-fashion-recommendations/asset/", type=str, help="data directory"
+        "--asset_dir", default="/opt/ml/musinsa_dataset/asset/", type=str, help="data directory"
     )
     parser.add_argument(
-        "--asset_file", default="fe_data.npy", type=str, help="extracted data file name"
+        "--asset_file", default="fe_data.csv", type=str, help="extracted data file name"
     )
     parser.add_argument(
-        "--class_file", default="id2product.pickle", type=str, help="class dictionary file name"
-    )
-    parser.add_argument(
-        "--path_file", default="path_list.pickle", type=str, help="class dictionary file name"
-    )
-    parser.add_argument(
-        "--model_dir", default="/opt/ml/h-and-m-personalized-fashion-recommendations/models/", type=str, help="model directory"
+        "--model_dir", default="/opt/ml/musinsa_dataset/models/", type=str, help="model directory"
     )
     parser.add_argument(
         "--model_name", default="test_model.pt", type=str, help="model file name"
     )
     parser.add_argument(
-        "--test_dir", default="/opt/ml/h-and-m-personalized-fashion-recommendations/test/", type=str, help="test file directory"
+        "--test_dir", default="/opt/ml/musinsa_dataset/test/", type=str, help="test file directory"
     )
     parser.add_argument(
         "--test_file_name", default="test_img.jpg", type=str, help="test file name"
     )
     parser.add_argument(
-        "--output_dir", default="/opt/ml/h-and-m-personalized-fashion-recommendations/output/", type=str, help="output directory"
+        "--output_dir", default="/opt/ml/musinsa_dataset/output/", type=str, help="output directory"
     )
     parser.add_argument(
         "--output_file_name", default="output.jpg", type=str, help="output file name"
@@ -59,10 +53,58 @@ def parse_args():
         "--limit_num", default=1000, type=int, help="number of images per class"
     )
     parser.add_argument(
-        "--product2id", nargs="+", default={}, type=dict, help="dictionary that matches product names with ids"
+        "--product2id", nargs="+", default={1001: 0,
+                                            1002: 1,
+                                            1005: 2,
+                                            2003: 3,
+                                            2021: 4,
+                                            2025: 5,
+                                            3002: 6,
+                                            3007: 7,
+                                            3009: 8,
+                                            4001: 9,
+                                            4002: 10,
+                                            4013: 11,
+                                            5006: 12,
+                                            5012: 13,
+                                            5015: 14,
+                                            7001: 15,
+                                            7004: 16,
+                                            7005: 17,
+                                            18003: 18,
+                                            20006: 19,
+                                            20007: 20,
+                                            20008: 21,
+                                            22001: 22,
+                                            22002: 23,
+                                            22003: 24}, type=dict, help="dictionary that matches product names with ids"
     )    
     parser.add_argument(
-        "--id2product", nargs="+", default={}, type=dict, help="dictionary that matches ids with product names"
+        "--id2product", nargs="+", default={0: "Top", 
+                                            1: "Top",
+                                            2: "Top",
+                                            3: "Outer",
+                                            4: "Outer",
+                                            5: "Outer",
+                                            6: "Pants",
+                                            7: "Pants",
+                                            8: "Pants",
+                                            9: "Bag",
+                                            10: "Bag",
+                                            11: "Bag",
+                                            12: "Shoes",
+                                            13: "Shoes", 
+                                            14: "Shoes",
+                                            15: "Headwear",
+                                            16: "Headwear",
+                                            17: "Headwear",
+                                            18: "Sneakers",
+                                            19: "OnePiece",
+                                            20: "OnePiece",
+                                            21: "OnePiece",
+                                            22: "Skirt",
+                                            23: "Skirt",
+                                            24: "Skirt"}, type=dict, help="dictionary that matches ids with product names"
     )
 
     # model
@@ -79,7 +121,7 @@ def parse_args():
         "--hidden_dim", default=512, type=int, help="hidden dimension size"
     ) 
     parser.add_argument(
-        "--output_dim", default=13, type=int, help="output dimension size"
+        "--output_dim", default=25, type=int, help="output dimension size"
     ) 
     parser.add_argument(
         "--drop_out", default=0.3, type=float, help="drop out rate"
