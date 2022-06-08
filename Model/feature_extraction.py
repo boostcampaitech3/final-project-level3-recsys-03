@@ -8,7 +8,7 @@ import modin.pandas as pd
 import numpy as np
 from rembg import remove
 from PIL import Image
-from dataloader import get_transforms
+from .dataloader import get_transforms
 
 
 class Identity(nn.Module):

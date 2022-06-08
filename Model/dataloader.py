@@ -10,7 +10,7 @@ from torchvision import transforms
 from torchvision.transforms import Resize, ToTensor, Normalize, RandomHorizontalFlip
 from PIL import Image
 
-from preprocess import get_preprocess
+from .preprocess import get_preprocess
 
 
 class Preprocess:

@@ -5,7 +5,7 @@ import modin.pandas as pd
 import wandb
 from config import parse_args
 import trainer
-from dataloader import Preprocess
+from .dataloader import Preprocess
 from sklearn.model_selection import train_test_split
 from utils import setseeds
 
