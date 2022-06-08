@@ -83,15 +83,24 @@ if st.button("업로드 완료"):
         st.write('옷 종류:', result.json()["category"])
         col1, col2, col3, col4 ,col5 = st.columns(5)
         col1.header("이미지1")
-        col1.image(result.json()["image0"][-1], use_column_width=True)
+        col1.markdown(f'''<a href={result.json()["image0"][2]}><img src={result.json()["image0"][-1]} height=180 width=150/></a>''',unsafe_allow_html=True)
+        col1.markdown(f'''<div align=center><a href={result.json()["image0"][2]}>{result.json()["image0"][0]}\n{result.json()["image0"][1]}</a></div>''',unsafe_allow_html=True)
+
         col2.header("이미지2")
-        col2.image(result.json()["image1"][-1], use_column_width=True)
+        col2.markdown(f'''<a href={result.json()["image1"][2]}><img src={result.json()["image1"][-1]} height=180 width=150/></a>''',unsafe_allow_html=True)
+        col2.markdown(f'''<div align=center><a href={result.json()["image1"][2]}>{result.json()["image1"][0]}\n{result.json()["image1"][1]}</a></div>''',unsafe_allow_html=True)
+
         col3.header("이미지3")
-        col3.image(result.json()["image2"][-1], use_column_width=True)
+        col3.markdown(f'''<a href={result.json()["image2"][2]}><img src={result.json()["image2"][-1]} height=180 width=150/></a>''',unsafe_allow_html=True)
+        col3.markdown(f'''<div align=center><a href={result.json()["image2"][2]}>{result.json()["image2"][0]}\n{result.json()["image2"][1]}</a></div>''',unsafe_allow_html=True)
+
         col4.header("이미지4")
-        col4.image(result.json()["image3"][-1], use_column_width=True)
+        col4.markdown(f'''<a href={result.json()["image3"][2]}><img src={result.json()["image3"][-1]} height=180 width=150/></a>''',unsafe_allow_html=True)
+        col4.markdown(f'''<div align=center><a href={result.json()["image3"][2]}>{result.json()["image3"][0]}\n{result.json()["image3"][1]}</a></div>''',unsafe_allow_html=True)
+        
         col5.header("이미지5")
-        col5.image(result.json()["image4"][-1], use_column_width=True)
+        col5.markdown(f'''<a href={result.json()["image4"][2]}><img src={result.json()["image4"][-1]} height=180 width=150/></a>''',unsafe_allow_html=True)
+        col5.markdown(f'''<div align=center><a href={result.json()["image4"][2]}>{result.json()["image4"][0]}\n{result.json()["image4"][1]}</a></body></div>''',unsafe_allow_html=True)
     else:
         st.write("좌측에서 이미지를 넣어주세요.")
 
