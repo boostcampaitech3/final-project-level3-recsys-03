@@ -77,7 +77,9 @@ def parse_args():
                                             20008: 21,
                                             22001: 22,
                                             22002: 23,
-                                            22003: 24}, type=dict, help="dictionary that matches product names with ids"
+                                            22003: 24,
+                                            1004: 25,
+                                            1010: 26,}, type=dict, help="dictionary that matches product names with ids"
     )    
     parser.add_argument(
         "--id2product", nargs="+", default={0: "Top", 
@@ -104,7 +106,9 @@ def parse_args():
                                             21: "OnePiece",
                                             22: "Skirt",
                                             23: "Skirt",
-                                            24: "Skirt"}, type=dict, help="dictionary that matches ids with product names"
+                                            24: "Skirt",
+                                            25: "Top",
+                                            26: "Top"}, type=dict, help="dictionary that matches ids with product names"
     )
 
     # model
@@ -121,7 +125,7 @@ def parse_args():
         "--hidden_dim", default=512, type=int, help="hidden dimension size"
     ) 
     parser.add_argument(
-        "--output_dim", default=25, type=int, help="output dimension size"
+        "--output_dim", default=27, type=int, help="output dimension size"
     ) 
     parser.add_argument(
         "--drop_out", default=0.3, type=float, help="drop out rate"
