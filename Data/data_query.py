@@ -104,30 +104,39 @@ def cal_similarity():
 
     """
     query = """
-            SELECT
-            t1.path AS key1,
-            t2.path AS key2,
-            (
-            SELECT
-                SUM(value1 * value2)/ SQRT(SUM(value1 * value1))/ SQRT(SUM(value2 * value2))
-            FROM
-                t1.features value1 WITH OFFSET pos1
-            JOIN
-                t2.features value2 WITH OFFSET pos2
-            ON
-                pos1 = pos2 ) AS cosine_similarity
-            FROM
-                musinsadb.img_features AS t1,
-                musinsadb.target AS t2
-            ORDER BY 
-                cosine_similarity
-            DESC
-
-            """
+        SELECT key1, key2, ( 
+        SELECT 
+            SUM(value1 * value2)/ 
+            SQRT(SUM(value1 * value1))/ 
+            SQRT(SUM(value2 * value2))
+        FROM UNNEST(nt.f1) value1 WITH OFFSET pos1 
+        JOIN UNNEST(nt.f2) value2 WITH OFFSET pos2 
+        ON pos1 = pos2 ) cosine_similarity
+        FROM `musinsadb.newtable` AS nt
+        ORDER BY cosine_similarity
+        DESC
+    """
     job = bq.query(query)
     df = job.to_dataframe()
     
     return df
 
+
+def creat_union_table():
+    query = """
+        CREATE OR REPLACE TABLE `clear-shell-351201.musinsadb.newtable`
+        AS SELECT
+            t1.path AS key1, t1.features AS f1,
+            t2.path AS key2, t2.features AS f2 as FLOAT64,
+            
+        FROM
+            musinsadb.img_features AS t1,
+            musinsadb.target AS t2
+    """
+
+    job = bq.query(query)    
+    print(
+            "created table ..."
+        )
 
 
