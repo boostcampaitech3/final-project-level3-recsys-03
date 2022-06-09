@@ -15,6 +15,10 @@ from .utils import get_similarity, draw
 
 def run(config, train_data, valid_data):
     train_loader, valid_loader = get_loaders(config, train_data, valid_data)
+    
+    # hidden, output dimension을 데이터에 맞게 적용
+    config.hidden_dim = train_data[:, :-1].shape[1]
+    config.output_dim = int(max(train_data[:,-1])) + 1  # 0부터 시작하므로 갯수는 +1 해줌
 
     # only when using warmup scheduler
     config.total_steps = int(math.ceil(len(train_loader.dataset) / config.batch_size)) * (
@@ -101,7 +105,6 @@ def train(train_loader, model, optimizer, scheduler, config):
     acc = total_correct / len(train_loader.dataset)
     loss_avg = total_loss / len(train_loader.dataset)
     print(f"TRAIN ACC : {acc}")
-    
     return acc, loss_avg
 
 
@@ -128,13 +131,14 @@ def validate(valid_loader, model, config):
     return acc
 
 
-def inference(config, image_path, extracted_data):
+def inference(config, image_path, extracted_data, path_list):
     """
     test image를 feature extraction하여 target을 예측
     
     Parameters:
     image_path(dtype=str): test data path
-    extracted_data(dtype=object) : brand, title, price, item_url, img_url, path, label, extraction_data
+    extracted_data(dtype=np.array) : feature extraction된 data, label, path
+    path_list(dtype=list) : path가 담겨진 list
     """
     transform = get_transforms()
     pre_model = get_pretrained_model(config)
@@ -153,19 +157,14 @@ def inference(config, image_path, extracted_data):
         category = config.id2product[int(preds)]
 
         # similarity를 구함
-        data = torch.tensor(extracted_data.iloc[:,7:].values)
-        # "brand", "title", "price", "item_url", "img_url", "path", "label", "extraction_data"
+        data = torch.tensor(extracted_data[:,:-1])
         total_similarity = sim_method(input, data.to(config.device))
 
-        # total_similarity 중 가장 similiarity가 높은 data k개 선정
+        # total_similarity 중 가장 similiarity가 높은 data k개의 path로 image 생성
         topk_idx = np.array(torch.topk(total_similarity, config.k)[1].to('cpu'))
-        topk_data = extracted_data.iloc[topk_idx]
-        topk_title =topk_data["title"].values
-        topk_price = topk_data["price"].values
-        topk_item_url = topk_data["item_url"].values
-        topk_img_url = topk_data["img_url"].values
+        topk_path = np.array(path_list)[topk_idx]
 
-    return (category, topk_title, topk_price, topk_item_url, topk_img_url)
+    return (category,topk_path)
 
 
 def get_model(config):

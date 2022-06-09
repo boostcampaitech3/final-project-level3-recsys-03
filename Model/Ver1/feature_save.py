@@ -1,8 +1,7 @@
 import os
+import pickle
 import torch
 import numpy as np
-import modin.pandas as pd
-
 from config import parse_args
 from dataloader import Preprocess
 from utils import setseeds
@@ -19,15 +18,24 @@ def main(config):
     preprocess.load_train_data(config.file_name)
     train_data = preprocess.get_train_data()
 
+    # inference 시 사용하기 위해 pickle로 저장 
+    print("saving id2product ...")
+    id2product_path = os.path.join(config.asset_dir, config.class_file)
+    with open(id2product_path,'wb') as fw:
+        pickle.dump(config.id2product, fw)
+    
+    print("saving path list ...")
+    pickle_path = os.path.join(config.asset_dir, config.path_file)
+    path_list = list(train_data['path'].values)
+    with open(pickle_path,'wb') as fw:
+        pickle.dump(path_list, fw)
+
     # feature extraction
     data = get_data(config, train_data)
 
-    # meta data, feature extraction된 data를 concatenate
-    train_df = pd.concat([train_data, data], axis=1)
-
     print("saving data ...")
     data_path = os.path.join(config.asset_dir, config.asset_file)
-    train_df.to_csv(data_path, index=False) # csv 저장
+    np.save(data_path, data)  # numpy 저장 시 (.npy)
 
 if __name__ == "__main__":
     config = parse_args()
