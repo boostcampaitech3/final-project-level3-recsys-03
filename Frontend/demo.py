@@ -9,7 +9,6 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder
 import io
 import time
 import argparse
-
 from yaml import parse
 
 parser = argparse.ArgumentParser(description="--docker=True/False, default=False")
@@ -50,22 +49,20 @@ st.set_option('deprecation.showfileUploaderEncoding', False)
 st.header("사진 업로드")
 
 #사이드바에서 crop에 사용될 기능 설정(업로드 파일 형식/테두리 색상/image 비율 고정)
-img_file = st.sidebar.file_uploader(label='사진 업로드', type=['png', 'jpg'])
-box_color = st.sidebar.color_picker(label="테두리 색상", value='#000000')
+img_file = st.file_uploader(label='', type=['png', 'jpg'])
 aspect_ratio = None
+
 
 #이미지 업로드시 crop 기능 실행
 if img_file:
     img = Image.open(img_file)
-    cropped_img = st_cropper(img, realtime_update=True, box_color=box_color,
+    cropped_img = st_cropper(img, realtime_update=True, box_color='#000000',
                                 aspect_ratio=aspect_ratio)
     
     # crop된 이미지를 출력 
-    st.write("업로드 될 사진")
+    st.write('업로드 될 사진')
     image = cropped_img.thumbnail((500,500))
     st.image(cropped_img)
-
-
 
 # 업로드 버튼을 누를 시 crop된 이미지를 확인, backend로 post 후에 image가 있는 dict를 받아옴
 if st.button("업로드 완료"):
@@ -80,25 +77,24 @@ if st.button("업로드 완료"):
             except:
                 time.sleep(2)
                 result = getData(img_np_array)
+        
+        st.header("비슷한 이미지 결과")
         st.write('옷 종류:', result.json()["category"])
+        
         col1, col2, col3, col4 ,col5 = st.columns(5)
-        col1.header("이미지1")
+
         col1.markdown(f'''<a href={result.json()["image0"][2]}><img src={result.json()["image0"][-1]} height=180 width=150/></a>''',unsafe_allow_html=True)
         col1.markdown(f'''<div align=center><a href={result.json()["image0"][2]}>{result.json()["image0"][0]}</br>{result.json()["image0"][1]}</a></div>''',unsafe_allow_html=True)
 
-        col2.header("이미지2")
         col2.markdown(f'''<a href={result.json()["image1"][2]}><img src={result.json()["image1"][-1]} height=180 width=150/></a>''',unsafe_allow_html=True)
         col2.markdown(f'''<div align=center><a href={result.json()["image1"][2]}>{result.json()["image1"][0]}</br>{result.json()["image1"][1]}</a></div>''',unsafe_allow_html=True)
 
-        col3.header("이미지3")
         col3.markdown(f'''<a href={result.json()["image2"][2]}><img src={result.json()["image2"][-1]} height=180 width=150/></a>''',unsafe_allow_html=True)
         col3.markdown(f'''<div align=center><a href={result.json()["image2"][2]}>{result.json()["image2"][0]}</br>{result.json()["image2"][1]}</a></div>''',unsafe_allow_html=True)
 
-        col4.header("이미지4")
         col4.markdown(f'''<a href={result.json()["image3"][2]}><img src={result.json()["image3"][-1]} height=180 width=150/></a>''',unsafe_allow_html=True)
         col4.markdown(f'''<div align=center><a href={result.json()["image3"][2]}>{result.json()["image3"][0]}</br>{result.json()["image3"][1]}</a></div>''',unsafe_allow_html=True)
         
-        col5.header("이미지5")
         col5.markdown(f'''<a href={result.json()["image4"][2]}><img src={result.json()["image4"][-1]} height=180 width=150/></a>''',unsafe_allow_html=True)
         col5.markdown(f'''<div align=center><a href={result.json()["image4"][2]}>{result.json()["image4"][0]}</br>{result.json()["image4"][1]}</a></body></div>''',unsafe_allow_html=True)
     else:
