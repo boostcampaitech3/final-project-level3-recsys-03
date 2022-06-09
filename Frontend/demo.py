@@ -49,23 +49,33 @@ st.set_option('deprecation.showfileUploaderEncoding', False)
 st.header("사진 업로드")
 
 #사이드바에서 crop에 사용될 기능 설정(업로드 파일 형식/테두리 색상/image 비율 고정)
-img_file = st.file_uploader(label='', type=['png', 'jpg'])
+img_file = st.file_uploader(label='', type=['jpg','jpeg'])
 aspect_ratio = None
 
-
+upload = ''
 #이미지 업로드시 crop 기능 실행
 if img_file:
     img = Image.open(img_file)
-    cropped_img = st_cropper(img, realtime_update=True, box_color='#000000',
-                                aspect_ratio=aspect_ratio)
+    new_width  = 250
+    new_height = int(new_width * img.height / img.width)
+    img = img.resize((new_width, new_height), Image.ANTIALIAS)
+
+    img_col,crop_col = st.columns(2)
+    
+    with img_col:
+        st.subheader('원본 사진')
+        cropped_img = st_cropper(img, realtime_update=True, box_color='#000000',
+                                    aspect_ratio=aspect_ratio)
     
     # crop된 이미지를 출력 
-    st.write('업로드 될 사진')
-    image = cropped_img.thumbnail((500,500))
-    st.image(cropped_img)
+    with crop_col:
+        st.subheader('편집된 사진')
+        cropped_img = cropped_img.resize((new_width, new_height), Image.ANTIALIAS)
+        st.image(cropped_img)
+        upload = st.button("업로드 완료")
 
 # 업로드 버튼을 누를 시 crop된 이미지를 확인, backend로 post 후에 image가 있는 dict를 받아옴
-if st.button("업로드 완료"):
+if upload:
     if cropped_img :
         with st.spinner('로딩중...'):
             cropped_img_bytearray = convert_pil_image_to_byte_array(cropped_img)
