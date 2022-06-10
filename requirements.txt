@@ -17,3 +17,4 @@ wandb==0.12.16
 Pillow==9.0.1
 efficientnet-pytorch==0.7.1
 rembg==2.0.13
+modin==0.14.1

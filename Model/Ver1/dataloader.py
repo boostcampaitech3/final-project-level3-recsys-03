@@ -2,7 +2,7 @@ import os
 import random
 
 import numpy as np
-import modin.pandas as pd
+import pandas as pd
 import tqdm
 
 import torch
@@ -68,8 +68,8 @@ class ExtractionDataset(torch.utils.data.Dataset):
     classfication 단게에서 사용
     """
     def __init__(self, img):
-        self.data = img.iloc[:, 1:].values
-        self.label = img['label'].values
+        self.data = img[:, :-1]
+        self.label = img[:, -1]
     
     def __getitem__(self, index):
         X = torch.tensor(self.data[index], dtype=torch.float32)

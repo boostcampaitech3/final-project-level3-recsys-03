@@ -27,16 +27,10 @@ def get_similar_fashion(file: bytes = File(...)):
 	img = io.BytesIO(file)
 	img = Image.open(img)
 	img = img.convert("RGB")
-	img.save('/opt/ml/musinsa_dataset/test/test_img.jpg')
-	category, topk_title, topk_price, topk_item_url, topk_img_url = get_similar_fashion_model(image=file)
+	img.save('/opt/ml/h-and-m-personalized-fashion-recommendations/test/test_img.jpg')
+	category,similar_fashion_list = get_similar_fashion_model(image=file)
 
-	return_dict = {}
-	return_dict['category'] = category
-	
-	for i in range(5):
-		return_dict['image'+str(i)] = [topk_title[i],topk_price[i],topk_item_url[i],topk_img_url[i]]
-	
-	return return_dict
+	return {'category' : category, "image0" : similar_fashion_list[0], "image1" : similar_fashion_list[1], "image2" : similar_fashion_list[2], "image3" : similar_fashion_list[3], "image4" : similar_fashion_list[4]}
 
 
 @app.post("/getCategory")
