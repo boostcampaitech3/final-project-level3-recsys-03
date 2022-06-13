@@ -75,7 +75,7 @@
 
 ### 1) 데이터셋 구성 파이프라인
 
-![Untitled](https://user-images.githubusercontent.com/78737997/173265831-9c98fcde-c41a-4835-b5e9-79add2b17db4.png)
+![image](https://user-images.githubusercontent.com/78737997/173267641-dea2bd15-a18e-42fb-ad9c-869d2772d287.png)
 
 ### 2) 데이터셋 수집
 
